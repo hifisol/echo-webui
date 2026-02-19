@@ -1,5 +1,5 @@
 :root {
-  /* Tron: Ares palette */
+  /* R/P/T/R palette */
   --bg-body: #060608;
   --bg-card: #0c0a0e;
   --bg-nav: #08060a;
@@ -11,7 +11,7 @@
   --text: #9a9098;
   --text-dim: #554a52;
   --text-bright: #e0d8dc;
-  --accent: #e01020;          /* Primary - Tron red */
+  --accent: #e01020;          /* Primary red */
   --accent-dim: #a00c18;
   --accent-glow: rgba(224,16,32,0.3);
   --copper: #c87840;          /* Secondary - warm copper */

@@ -1,6 +1,6 @@
 # R/P/T/R — Recon & Pentest Tactical Rig
 
-Tactical RF dashboard for Raspberry Pi pentesting rigs. Built with Flask, HTMX, and Server-Sent Events for real-time updates. Dark theme inspired by Tron: Ares.
+Tactical RF dashboard for Raspberry Pi pentesting rigs. Built with Flask, HTMX, and Server-Sent Events for real-time updates. Dark tactical theme with red accent palette.
 
 ![R/P/T/R Dashboard](screenshot.png)
 
@@ -113,7 +113,7 @@ rptr-webui/
 │   └── system.py           # System status
 ├── templates/              # Jinja2 + HTMX partials
 ├── static/
-│   ├── css/pager.css       # Dark Tron: Ares theme
+│   ├── css/pager.css       # Dark tactical theme
 │   └── js/
 │       ├── app.js          # SSE handler, utilities
 │       └── spectrum.js     # Canvas spectrum/waterfall
