@@ -1,0 +1,16 @@
+<div style="margin-bottom:8px;">
+  <span class="badge badge-wpa2">{{ job.tool }}</span>
+  <span class="status-dot {{ job.status }}" style="margin-left:8px;"></span>
+  <span style="font-size:12px;">{{ job.status }}</span>
+  <span style="font-size:11px;color:var(--text-dim);margin-left:8px;">ID: {{ job.id }}</span>
+  {% if job.exit_code is not none %}
+  <span style="font-size:11px;color:{% if job.exit_code == 0 %}var(--accent){% else %}var(--red){% endif %};margin-left:8px;">Exit: {{ job.exit_code }}</span>
+  {% endif %}
+</div>
+<div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">
+  <code>{{ job.args }}</code>
+</div>
+<div class="terminal" hx-get="/jobs/api/{{ job.id }}" hx-trigger="{% if job.status == 'running' %}every 2s{% endif %}" hx-swap="innerHTML" hx-target="#job-output">
+{% for line in job.output %}{{ line }}
+{% endfor %}
+</div>

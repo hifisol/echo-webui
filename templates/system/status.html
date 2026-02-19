@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}RPTR - System{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>System Status</h2>
+</div>
+
+<div hx-get="/system/api/metrics" hx-trigger="load, every 5s" hx-swap="innerHTML" id="system-metrics">
+  {% include "system/_sysinfo.html" %}
+</div>
+{% endblock %}

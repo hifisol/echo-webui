@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}RPTR - Dashboard{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Dashboard</h2>
+</div>
+
+<div hx-get="/api/dashboard/stats" hx-trigger="load, every 5s" hx-swap="innerHTML" id="dashboard-stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Loading...</div>
+      <div class="stat-value">--</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

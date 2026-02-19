@@ -1,0 +1,85 @@
+{% if contact %}
+<h3 style="margin-bottom:12px;color:var(--copper)">{{ contact.name or contact.node_id }}</h3>
+
+<div class="mesh-status-grid" style="margin-bottom:16px">
+  <div class="status-item">
+    <span class="status-label">Node ID</span>
+    <span class="status-value mono">{{ contact.node_id }}</span>
+  </div>
+  <div class="status-item">
+    <span class="status-label">Battery</span>
+    <span class="status-value">{{ contact.battery_level or '-' }}{% if contact.battery_level %}%{% endif %}</span>
+  </div>
+  <div class="status-item">
+    <span class="status-label">SNR</span>
+    <span class="status-value">{{ "%.1f dB"|format(contact.snr) if contact.snr is not none else '-' }}</span>
+  </div>
+  <div class="status-item">
+    <span class="status-label">Position</span>
+    <span class="status-value">
+      {% if contact.latitude and contact.longitude %}
+      {{ "%.5f"|format(contact.latitude) }}, {{ "%.5f"|format(contact.longitude) }}
+      {% else %}-{% endif %}
+    </span>
+  </div>
+  <div class="status-item">
+    <span class="status-label">First Seen</span>
+    <span class="status-value" style="font-size:11px">{{ contact.first_seen }}</span>
+  </div>
+  <div class="status-item">
+    <span class="status-label">Last Heard</span>
+    <span class="status-value" style="font-size:11px">{{ contact.last_heard }}</span>
+  </div>
+</div>
+
+<div style="display:flex;gap:6px;margin-bottom:16px">
+  <button class="btn btn-sm" hx-post="/mesh/api/request_telemetry"
+          hx-vals='{"contact_key":"{{ contact.public_key[:12] if contact.public_key else contact.node_id }}"}'
+          hx-target="#mesh-status">Request Telemetry</button>
+</div>
+
+{% if telemetry %}
+<h4 style="margin-bottom:8px;color:var(--steel)">Recent Telemetry</h4>
+<div class="table-wrap" style="max-height:200px;overflow-y:auto;margin-bottom:16px">
+  <table>
+    <thead>
+      <tr><th>Time</th><th>Battery</th><th>Voltage</th><th>Temp</th><th>Position</th></tr>
+    </thead>
+    <tbody>
+      {% for t in telemetry %}
+      <tr>
+        <td style="font-size:11px">{{ t.timestamp }}</td>
+        <td>{{ t.battery_level or '-' }}{% if t.battery_level %}%{% endif %}</td>
+        <td>{{ "%.2f"|format(t.voltage) if t.voltage else '-' }}V</td>
+        <td>{{ "%.1f"|format(t.temperature) if t.temperature else '-' }}</td>
+        <td style="font-size:11px">
+          {% if t.latitude %}{{ "%.4f"|format(t.latitude) }}, {{ "%.4f"|format(t.longitude) }}{% else %}-{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if messages %}
+<h4 style="margin-bottom:8px;color:var(--steel)">Message History</h4>
+<div class="mesh-message-container">
+  {% for msg in messages %}
+  <div class="mesh-message {% if msg.direction == 'sent' %}mesh-msg-sent{% else %}mesh-msg-recv{% endif %}">
+    <div class="mesh-msg-header">
+      <span class="mesh-msg-dir">{{ msg.direction|upper }}</span>
+      <span class="mesh-msg-time">{{ msg.timestamp }}</span>
+    </div>
+    <div class="mesh-msg-body">{{ msg.message }}</div>
+    {% if msg.snr is not none %}
+    <div class="mesh-msg-meta">SNR: {{ "%.1f"|format(msg.snr) }} dB{% if msg.hop_count %} | Hops: {{ msg.hop_count }}{% endif %}{% if msg.ack_received %} | ACK{% endif %}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% else %}
+<p style="color:var(--text-dim)">Contact not found.</p>
+{% endif %}

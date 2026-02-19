@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}RPTR{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/pager.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/htmx-ext-sse@2.2.2/sse.js"></script>
+</head>
+<body>
+  {% block body %}
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <h1>R<span class="sep">/</span>P<span class="sep">/</span>T<span class="sep">/</span>R</h1>
+        <div class="subtitle">Recon & Pentest Tactical Rig</div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">
+          <span class="nav-icon">&#9632;</span>
+          <span>Dashboard</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Wireless</div>
+        <a href="/recon" class="nav-item {% if request.path.startswith('/recon') %}active{% endif %}">
+          <span class="nav-icon">&#9678;</span>
+          <span>Recon</span>
+        </a>
+        <a href="/attacks" class="nav-item {% if request.path.startswith('/attacks') %}active{% endif %}">
+          <span class="nav-icon">&#9889;</span>
+          <span>Attacks</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">RF</div>
+        <a href="/sdr" class="nav-item {% if request.path.startswith('/sdr') %}active{% endif %}">
+          <span class="nav-icon">&#8767;</span>
+          <span>Spectrum</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Mesh</div>
+        <a href="/mesh" class="nav-item {% if request.path.startswith('/mesh') %}active{% endif %}">
+          <span class="nav-icon">&#9671;</span>
+          <span>LoRa Mesh</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/jobs" class="nav-item {% if request.path.startswith('/jobs') %}active{% endif %}">
+          <span class="nav-icon">&#9881;</span>
+          <span>Jobs</span>
+        </a>
+        <a href="/system" class="nav-item {% if request.path.startswith('/system') %}active{% endif %}">
+          <span class="nav-icon">&#9881;</span>
+          <span>System</span>
+        </a>
+      </div>
+
+      <div style="flex:1"></div>
+      <div class="nav-section" style="border-top: 1px solid var(--border);">
+        <div hx-get="/api/interface/status" hx-trigger="load, every 5s" hx-swap="innerHTML" id="iface-status" style="padding: 8px 16px;"></div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% endblock %}
+
+  <script src="/static/js/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

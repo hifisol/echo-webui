@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}RPTR - Login{% endblock %}
+{% block body %}
+<div class="login-container">
+  <div class="login-box">
+    <h1>R<span class="sep">/</span>P<span class="sep">/</span>T<span class="sep">/</span>R</h1>
+    <div class="subtitle">RECON & PENTEST TACTICAL RIG</div>
+    {% if error %}
+    <div class="login-error">{{ error }}</div>
+    {% endif %}
+    <form method="POST" action="/login">
+      <input type="password" name="token" placeholder="Enter access token" autofocus>
+      <button type="submit" class="btn btn-primary">Authenticate</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

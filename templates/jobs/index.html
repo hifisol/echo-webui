@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}RPTR - Jobs{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Job Queue</h2>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3>Active & Recent Jobs</h3>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-sm" hx-get="/jobs/api/list" hx-target="#job-list">All</button>
+      <button class="btn btn-sm" hx-get="/jobs/api/list?status=running" hx-target="#job-list">Running</button>
+      <button class="btn btn-sm" hx-get="/jobs/api/list?status=completed" hx-target="#job-list">Completed</button>
+      <button class="btn btn-sm" hx-get="/jobs/api/list?status=failed" hx-target="#job-list">Failed</button>
+    </div>
+  </div>
+  <div id="job-list" hx-get="/jobs/api/list" hx-trigger="load, every 3s" hx-swap="innerHTML">
+    <div class="card-body" style="color:var(--text-dim)">Loading...</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px;">
+  <div class="card-header"><h3>Job Output</h3></div>
+  <div class="card-body">
+    <div id="job-output" class="terminal" style="min-height:200px;">Select a job to view its output.</div>
+  </div>
+</div>
+{% endblock %}

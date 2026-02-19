@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}RPTR - Recon{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Recon</h2>
+  <div class="topbar-actions">
+    <button class="btn btn-primary" hx-post="/recon/api/start" hx-target="#scan-status" hx-swap="innerHTML">Start Scan</button>
+    <button class="btn" hx-post="/recon/api/stop" hx-target="#scan-status" hx-swap="innerHTML">Stop Scan</button>
+  </div>
+</div>
+
+<div id="scan-status"></div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('aps', this)">Access Points</div>
+  <div class="tab" onclick="showTab('clients', this)">Clients</div>
+  <div class="tab" onclick="showTab('probes', this)">Probe Requests</div>
+</div>
+
+<div id="tab-aps">
+  <div class="filter-bar">
+    <input type="text" name="search" placeholder="Filter by SSID or BSSID..."
+           hx-get="/recon/api/aps" hx-trigger="keyup changed delay:300ms"
+           hx-target="#ap-table" hx-include="[name='search']">
+  </div>
+  <div class="card">
+    <div id="ap-table" hx-get="/recon/api/aps" hx-trigger="load, every 3s" hx-swap="innerHTML">
+      <div class="card-body" style="color:var(--text-dim)">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-clients" style="display:none">
+  <div class="card">
+    <div id="client-table" hx-get="/recon/api/clients" hx-trigger="load, every 3s" hx-swap="innerHTML">
+      <div class="card-body" style="color:var(--text-dim)">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-probes" style="display:none">
+  <div class="card">
+    <div id="probe-table" hx-get="/recon/api/probes" hx-trigger="load, every 5s" hx-swap="innerHTML">
+      <div class="card-body" style="color:var(--text-dim)">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(name, el) {
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = 'block';
+  el.classList.add('active');
+}
+</script>
+{% endblock %}

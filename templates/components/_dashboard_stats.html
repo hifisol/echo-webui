@@ -1,0 +1,53 @@
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Access Points</div>
+    <div class="stat-value accent">{{ aps }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Clients</div>
+    <div class="stat-value cyan">{{ clients }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Running Jobs</div>
+    <div class="stat-value amber">{{ running_jobs }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Handshakes</div>
+    <div class="stat-value">{{ handshakes }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">CPU</div>
+    <div class="stat-value {% if sys.cpu_percent > 80 %}red{% elif sys.cpu_percent > 50 %}amber{% else %}accent{% endif %}">{{ sys.cpu_percent }}%</div>
+    <div class="progress" style="margin-top:8px">
+      <div class="progress-bar {% if sys.cpu_percent > 80 %}red{% elif sys.cpu_percent > 50 %}amber{% else %}green{% endif %}" style="width:{{ sys.cpu_percent }}%"></div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Memory</div>
+    <div class="stat-value {% if sys.mem_percent > 80 %}red{% elif sys.mem_percent > 50 %}amber{% else %}accent{% endif %}">{{ sys.mem_percent }}%</div>
+    <div class="progress" style="margin-top:8px">
+      <div class="progress-bar {% if sys.mem_percent > 80 %}red{% elif sys.mem_percent > 50 %}amber{% else %}green{% endif %}" style="width:{{ sys.mem_percent }}%"></div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Disk</div>
+    <div class="stat-value">{{ sys.disk_percent }}%</div>
+    <div class="progress" style="margin-top:8px">
+      <div class="progress-bar {% if sys.disk_percent > 90 %}red{% elif sys.disk_percent > 70 %}amber{% else %}green{% endif %}" style="width:{{ sys.disk_percent }}%"></div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">WiFi Adapter</div>
+    <div class="stat-value {% if wifi.adapter_present %}accent{% else %}red{% endif %}">
+      {% if wifi.adapter_present %}{{ wifi.mode or 'ready' }}{% else %}ABSENT{% endif %}
+    </div>
+  </div>
+</div>
+
+{% if sys.cpu_temp %}
+<div class="card" style="margin-top:8px">
+  <div class="card-body" style="padding:8px 16px;">
+    <span style="color:var(--text-dim);font-size:11px;">TEMP: {{ "%.1f"|format(sys.cpu_temp) }}&deg;C &nbsp; | &nbsp; LOAD: {{ sys.load_1 }} / {{ sys.load_5 }} / {{ sys.load_15 }} &nbsp; | &nbsp; HOST: {{ sys.hostname }}</span>
+  </div>
+</div>
+{% endif %}

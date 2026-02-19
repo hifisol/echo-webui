@@ -1,0 +1,43 @@
+auth:
+  token: "change-me-on-first-run"
+
+server:
+  host: "0.0.0.0"
+  port: 8443
+  workers: 2
+  threads: 4
+
+interfaces:
+  wifi: "wlan0"
+
+database:
+  path: "/opt/rptr-webui/data/rptr.db"
+
+captures:
+  dir: "/opt/rptr-webui/data/captures"
+  max_disk_percent: 90
+
+sdr:
+  device_index: 0
+  recordings_dir: "/opt/rptr-webui/data/sdr"
+
+jobs:
+  max_concurrent: 4
+  output_buffer_lines: 1000
+
+scanner:
+  backend: "tshark"
+  channel_hop_interval: 0.5
+  default_channels: [1, 6, 11, 36, 40, 44, 48]
+
+mesh:
+  enabled: false
+  serial_port: "/dev/ttyUSB0"
+  baud_rate: 115200
+  auto_connect: false
+  message_history_days: 30
+  telemetry_poll_interval: 300
+
+ui:
+  refresh_interval: 2
+  results_per_page: 50

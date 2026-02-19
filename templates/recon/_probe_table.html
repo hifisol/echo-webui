@@ -1,0 +1,22 @@
+<table>
+  <thead>
+    <tr>
+      <th>Client MAC</th>
+      <th>Probed SSID</th>
+      <th>Signal</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for probe in probes %}
+    <tr>
+      <td class="mono" style="font-size:11px;">{{ probe.client_mac }}</td>
+      <td>{{ probe.ssid }}</td>
+      <td>{{ probe.signal_dbm or '-' }} dBm</td>
+      <td style="font-size:11px;color:var(--text-dim)">{{ probe.timestamp }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:24px;">No probe requests captured.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>

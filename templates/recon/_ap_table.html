@@ -1,0 +1,43 @@
+<table>
+  <thead>
+    <tr>
+      <th hx-get="/recon/api/aps?sort=ssid&order={% if sort=='ssid' and order=='asc' %}desc{% else %}asc{% endif %}" hx-target="#ap-table" {% if sort=='ssid' %}class="sorted"{% endif %}>SSID</th>
+      <th hx-get="/recon/api/aps?sort=bssid&order={% if sort=='bssid' and order=='asc' %}desc{% else %}asc{% endif %}" hx-target="#ap-table" {% if sort=='bssid' %}class="sorted"{% endif %}>BSSID</th>
+      <th hx-get="/recon/api/aps?sort=channel&order={% if sort=='channel' and order=='asc' %}desc{% else %}asc{% endif %}" hx-target="#ap-table" {% if sort=='channel' %}class="sorted"{% endif %}>CH</th>
+      <th hx-get="/recon/api/aps?sort=signal_dbm&order={% if sort=='signal_dbm' and order=='desc' %}asc{% else %}desc{% endif %}" hx-target="#ap-table" {% if sort=='signal_dbm' %}class="sorted"{% endif %}>Signal</th>
+      <th hx-get="/recon/api/aps?sort=encryption&order={% if sort=='encryption' and order=='asc' %}desc{% else %}asc{% endif %}" hx-target="#ap-table" {% if sort=='encryption' %}class="sorted"{% endif %}>Enc</th>
+      <th hx-get="/recon/api/aps?sort=client_count&order={% if sort=='client_count' and order=='desc' %}asc{% else %}desc{% endif %}" hx-target="#ap-table" {% if sort=='client_count' %}class="sorted"{% endif %}>Clients</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ap in aps %}
+    <tr>
+      <td>{% if ap.ssid %}{{ ap.ssid }}{% elif ap.hidden %}<span style="color:var(--text-dim)">[Hidden]</span>{% else %}<span style="color:var(--text-dim)">[Unknown]</span>{% endif %}</td>
+      <td class="mono" style="font-size:11px;color:var(--text-dim)">{{ ap.bssid }}</td>
+      <td>{{ ap.channel or '-' }}</td>
+      <td>
+        {% if ap.signal_dbm is not none %}
+        {% set pct = [100 + ap.signal_dbm, 100] | min %}
+        {% set pct = [pct, 0] | max %}
+        <span style="color:{% if ap.signal_dbm > -50 %}var(--accent){% elif ap.signal_dbm > -70 %}var(--amber){% else %}var(--red){% endif %}">{{ ap.signal_dbm }} dBm</span>
+        <div class="signal-bar {% if ap.signal_dbm > -50 %}signal-strong{% elif ap.signal_dbm > -70 %}signal-medium{% else %}signal-weak{% endif %}" style="width:{{ pct }}px"></div>
+        {% else %}-{% endif %}
+      </td>
+      <td>
+        {% if ap.encryption %}
+        <span class="badge badge-{{ ap.encryption|lower|replace(' ','') }}">{{ ap.encryption }}</span>
+        {% else %}
+        <span class="badge badge-open">Open</span>
+        {% endif %}
+      </td>
+      <td>{{ ap.client_count }}</td>
+      <td>
+        <button class="btn btn-sm" hx-get="/recon/api/clients?bssid={{ ap.bssid }}" hx-target="#client-table">Clients</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:24px;">No access points discovered. Start a scan to begin.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>

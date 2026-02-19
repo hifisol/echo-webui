@@ -1,0 +1,32 @@
+<table>
+  <thead>
+    <tr>
+      <th>MAC Address</th>
+      <th>Associated AP</th>
+      <th>Signal</th>
+      <th>Vendor</th>
+      <th>Last Seen</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for client in clients %}
+    <tr>
+      <td class="mono" style="font-size:11px;">{{ client.mac }}</td>
+      <td class="mono" style="font-size:11px;color:var(--text-dim)">{{ client.associated_bssid or 'Probing' }}</td>
+      <td>
+        {% if client.signal_dbm is not none %}
+        <span style="color:{% if client.signal_dbm > -50 %}var(--accent){% elif client.signal_dbm > -70 %}var(--amber){% else %}var(--red){% endif %}">{{ client.signal_dbm }} dBm</span>
+        {% else %}-{% endif %}
+      </td>
+      <td style="color:var(--text-dim)">{{ client.vendor or '-' }}</td>
+      <td style="font-size:11px;color:var(--text-dim)">{{ client.last_seen }}</td>
+      <td>
+        <button class="btn btn-sm" hx-get="/recon/api/probes?mac={{ client.mac }}" hx-target="#probe-table">Probes</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:24px;">No clients discovered.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>

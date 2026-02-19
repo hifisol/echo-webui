@@ -1,0 +1,27 @@
+[Unit]
+Description=R/P/T/R WebUI - Recon & Pentest Tactical Rig
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/rptr-webui
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/rptr-webui/venv/bin/gunicorn \
+    --bind 0.0.0.0:8443 \
+    --workers 2 \
+    --threads 4 \
+    --timeout 300 \
+    --graceful-timeout 30 \
+    --keep-alive 75 \
+    --worker-class gthread \
+    app:app
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

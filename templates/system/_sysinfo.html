@@ -1,0 +1,94 @@
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Hostname</div>
+    <div class="stat-value" style="font-size:16px;">{{ sys.hostname }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">CPU Usage</div>
+    <div class="stat-value {% if sys.cpu_percent > 80 %}red{% elif sys.cpu_percent > 50 %}amber{% else %}accent{% endif %}">{{ sys.cpu_percent }}%</div>
+    <div class="progress" style="margin-top:8px">
+      <div class="progress-bar {% if sys.cpu_percent > 80 %}red{% elif sys.cpu_percent > 50 %}amber{% else %}green{% endif %}" style="width:{{ sys.cpu_percent }}%"></div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Memory</div>
+    <div class="stat-value {% if sys.mem_percent > 80 %}red{% elif sys.mem_percent > 50 %}amber{% else %}accent{% endif %}">{{ sys.mem_percent }}%</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">{{ (sys.mem_used / 1073741824)|round(1) }}GB / {{ (sys.mem_total / 1073741824)|round(1) }}GB</div>
+    <div class="progress" style="margin-top:4px">
+      <div class="progress-bar {% if sys.mem_percent > 80 %}red{% elif sys.mem_percent > 50 %}amber{% else %}green{% endif %}" style="width:{{ sys.mem_percent }}%"></div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Disk</div>
+    <div class="stat-value">{{ sys.disk_percent }}%</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">{{ (sys.disk_used / 1073741824)|round(1) }}GB / {{ (sys.disk_total / 1073741824)|round(1) }}GB</div>
+    <div class="progress" style="margin-top:4px">
+      <div class="progress-bar {% if sys.disk_percent > 90 %}red{% elif sys.disk_percent > 70 %}amber{% else %}green{% endif %}" style="width:{{ sys.disk_percent }}%"></div>
+    </div>
+  </div>
+  {% if sys.cpu_temp %}
+  <div class="stat-card">
+    <div class="stat-label">Temperature</div>
+    <div class="stat-value {% if sys.cpu_temp > 70 %}red{% elif sys.cpu_temp > 55 %}amber{% else %}accent{% endif %}">{{ "%.1f"|format(sys.cpu_temp) }}&deg;C</div>
+  </div>
+  {% endif %}
+  <div class="stat-card">
+    <div class="stat-label">Load Average</div>
+    <div class="stat-value" style="font-size:16px;">{{ sys.load_1 }} / {{ sys.load_5 }} / {{ sys.load_15 }}</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header"><h3>WiFi Adapter</h3></div>
+    <div class="card-body">
+      {% if wifi.adapter_present %}
+      <table>
+        <tr><td style="color:var(--text-dim)">Interface</td><td>{{ wifi.interface }}</td></tr>
+        <tr><td style="color:var(--text-dim)">Mode</td><td><span class="badge {% if wifi.mode == 'monitor' %}badge-wpa2{% else %}badge-wpa{% endif %}">{{ wifi.mode or 'unknown' }}</span></td></tr>
+        {% if wifi.channel %}<tr><td style="color:var(--text-dim)">Channel</td><td>{{ wifi.channel }}</td></tr>{% endif %}
+      </table>
+      <div style="margin-top:12px;">
+        <button class="btn btn-sm" hx-post="/api/interface/monitor" hx-target="#system-metrics" hx-swap="innerHTML">Toggle Monitor Mode</button>
+      </div>
+      {% else %}
+      <div class="alert alert-danger">WiFi adapter not detected. Plug in the RTL8812AU.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>USB Devices</h3></div>
+    <div class="card-body">
+      {% for device in usb %}
+      <div style="padding:4px 0;font-size:12px;border-bottom:1px solid var(--border);">{{ device }}</div>
+      {% else %}
+      <div style="color:var(--text-dim)">No USB devices detected.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><h3>Network Interfaces</h3></div>
+  <div class="card-body">
+    <table>
+      <thead>
+        <tr><th>Interface</th><th>Status</th><th>Addresses</th></tr>
+      </thead>
+      <tbody>
+        {% for iface in interfaces %}
+        <tr>
+          <td>{{ iface.name }}</td>
+          <td><span class="status-dot {% if iface.is_up %}running{% else %}failed{% endif %}"></span>{{ 'UP' if iface.is_up else 'DOWN' }}</td>
+          <td style="font-size:11px;">
+            {% for addr in iface.addrs %}
+            <span style="color:{% if addr.type == 'ipv4' %}var(--cyan){% else %}var(--text-dim){% endif %}">{{ addr.address }}</span>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

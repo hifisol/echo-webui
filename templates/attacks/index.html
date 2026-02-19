@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}RPTR - Attacks{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h2>Attack Controls</h2>
+</div>
+
+<div class="safety-lock {% if unlocked %}unlocked{% endif %}">
+  <span style="font-size:18px;">{% if unlocked %}&#9888;{% else %}&#128274;{% endif %}</span>
+  <div style="flex:1">
+    <div style="font-size:13px;color:{% if unlocked %}var(--amber){% else %}var(--red){% endif %};font-weight:600;">
+      {% if unlocked %}SAFETY UNLOCKED - Attacks enabled{% else %}SAFETY LOCKED - Attacks disabled{% endif %}
+    </div>
+    <div style="font-size:11px;color:var(--text-dim)">All attack operations require the safety lock to be disengaged.</div>
+  </div>
+  <button class="btn {% if unlocked %}btn-danger{% else %}btn-primary{% endif %} btn-sm"
+          hx-post="/attacks/api/toggle-safety" hx-target="body" hx-swap="innerHTML">
+    {% if unlocked %}Lock{% else %}Unlock{% endif %}
+  </button>
+</div>
+
+<div id="attack-status"></div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header"><h3>Deauth Attack</h3></div>
+    <div class="card-body">
+      <form hx-post="/attacks/api/deauth" hx-target="#attack-status" hx-swap="innerHTML"
+            hx-confirm="Execute deauth attack? This will disconnect clients from the target AP.">
+        <div class="form-group">
+          <label>Target BSSID</label>
+          <input type="text" name="bssid" placeholder="AA:BB:CC:DD:EE:FF" pattern="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$" required style="width:100%">
+        </div>
+        <div class="form-group">
+          <label>Client MAC (optional - all clients if empty)</label>
+          <input type="text" name="client_mac" placeholder="AA:BB:CC:DD:EE:FF" style="width:100%">
+        </div>
+        <div class="form-group">
+          <label>Packet Count</label>
+          <input type="number" name="count" value="10" min="1" max="100" style="width:100%">
+        </div>
+        <button type="submit" class="btn btn-danger" {% if not unlocked %}disabled{% endif %}>Launch Deauth</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Handshake Capture</h3></div>
+    <div class="card-body">
+      <form hx-post="/attacks/api/handshake" hx-target="#attack-status" hx-swap="innerHTML">
+        <div class="form-group">
+          <label>Target BSSID</label>
+          <input type="text" name="bssid" placeholder="AA:BB:CC:DD:EE:FF" required style="width:100%">
+        </div>
+        <div class="form-group">
+          <label>Channel</label>
+          <input type="number" name="channel" placeholder="6" min="1" max="165" required style="width:100%">
+        </div>
+        <button type="submit" class="btn btn-primary" {% if not unlocked %}disabled{% endif %}>Start Capture</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>WPS Attack</h3></div>
+    <div class="card-body">
+      <form hx-post="/attacks/api/wps" hx-target="#attack-status" hx-swap="innerHTML"
+            hx-confirm="Start WPS brute force attack?">
+        <div class="form-group">
+          <label>Target BSSID</label>
+          <input type="text" name="bssid" placeholder="AA:BB:CC:DD:EE:FF" required style="width:100%">
+        </div>
+        <div class="form-group">
+          <label>Tool</label>
+          <select name="tool" style="width:100%">
+            <option value="reaver">Reaver</option>
+            <option value="bully">Bully</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-danger" {% if not unlocked %}disabled{% endif %}>Start WPS Attack</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Nmap Scan</h3></div>
+    <div class="card-body">
+      <form hx-post="/attacks/api/nmap" hx-target="#attack-status" hx-swap="innerHTML">
+        <div class="form-group">
+          <label>Target (IP/CIDR)</label>
+          <input type="text" name="target" placeholder="192.168.1.0/24" required style="width:100%">
+        </div>
+        <div class="form-group">
+          <label>Flags</label>
+          <input type="text" name="flags" value="-sV" style="width:100%">
+        </div>
+        <button type="submit" class="btn btn-primary" {% if not unlocked %}disabled{% endif %}>Start Scan</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

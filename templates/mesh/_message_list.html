@@ -1,0 +1,30 @@
+<div class="mesh-message-container">
+  {% for msg in messages %}
+  <div class="mesh-message {% if msg.direction == 'sent' %}mesh-msg-sent{% else %}mesh-msg-recv{% endif %}">
+    <div class="mesh-msg-header">
+      <span class="mesh-msg-from">
+        {% if msg.message_type == 'channel' %}
+        <span class="badge badge-steel">CH {{ msg.channel_id or 0 }}</span>
+        {% endif %}
+        {% if msg.direction == 'sent' %}
+          &rarr; {{ msg.to_node_id or 'broadcast' }}
+        {% else %}
+          &larr; {{ msg.from_node_id or 'unknown' }}
+        {% endif %}
+      </span>
+      <span class="mesh-msg-time">{{ msg.timestamp }}</span>
+    </div>
+    <div class="mesh-msg-body">{{ msg.message }}</div>
+    <div class="mesh-msg-meta">
+      {% if msg.snr is not none %}SNR: {{ "%.1f"|format(msg.snr) }} dB{% endif %}
+      {% if msg.hop_count %} | Hops: {{ msg.hop_count }}{% endif %}
+      {% if msg.ack_received %}<span style="color:var(--success)"> ACK</span>{% endif %}
+      {% if msg.direction == 'sent' and not msg.ack_received %}<span style="color:var(--text-dim)"> pending</span>{% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div style="text-align:center;color:var(--text-dim);padding:32px">
+    No messages yet.
+  </div>
+  {% endfor %}
+</div>

@@ -1,0 +1,6 @@
+{% for key, preset in presets.items() %}
+<button class="btn btn-sm preset-btn" data-preset="{{ key }}"
+        onclick="selectPreset('{{ key }}', '{{ preset.start }}', '{{ preset.end }}', '{{ preset.bin }}')">
+  {{ preset.label }}
+</button>
+{% endfor %}

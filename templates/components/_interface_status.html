@@ -1,0 +1,17 @@
+<div style="font-size:11px;">
+  {% if wifi.adapter_present %}
+  <div style="margin-bottom:4px;">
+    <span class="status-dot running"></span>
+    <span style="color:var(--accent);">{{ wifi.interface }}</span>
+  </div>
+  <div style="color:var(--text-dim);">
+    Mode: {{ wifi.mode or 'unknown' }}<br>
+    {% if wifi.channel %}Ch: {{ wifi.channel }}{% endif %}
+  </div>
+  {% else %}
+  <div>
+    <span class="status-dot failed"></span>
+    <span style="color:var(--red);font-size:11px;">No WiFi</span>
+  </div>
+  {% endif %}
+</div>

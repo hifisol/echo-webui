@@ -1,0 +1,41 @@
+<div class="card-body">
+  <div class="mesh-status-grid">
+    <div class="status-item">
+      <span class="status-label">Connection</span>
+      <span class="status-value {% if connected %}text-success{% else %}text-dim{% endif %}">
+        {{ "Connected" if connected else "Disconnected" }}
+      </span>
+    </div>
+    {% if error %}
+    <div class="status-item" style="grid-column:span 2">
+      <span class="status-label">Error</span>
+      <span class="status-value text-danger">{{ error }}</span>
+    </div>
+    {% endif %}
+    {% if connected %}
+    <div class="status-item">
+      <span class="status-label">Device</span>
+      <span class="status-value">{{ state.get("name", "Unknown") }}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Battery</span>
+      <span class="status-value">
+        {% if state.get("battery_level") %}
+        <span class="battery-indicator">
+          <span class="battery-level" style="width:{{ state.battery_level }}%;background:{% if state.battery_level|int > 60 %}var(--success){% elif state.battery_level|int > 30 %}var(--amber){% else %}var(--red){% endif %}"></span>
+        </span>
+        {{ state.battery_level }}%
+        {% else %}-{% endif %}
+      </span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Voltage</span>
+      <span class="status-value">{{ state.get("voltage", "-") }}V</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">TX Power</span>
+      <span class="status-value">{{ state.get("tx_power", "-") }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>

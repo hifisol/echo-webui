@@ -1,0 +1,48 @@
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th><a hx-get="/mesh/api/contacts?sort=node_id" hx-target="#contact-table">Node</a></th>
+        <th><a hx-get="/mesh/api/contacts?sort=name" hx-target="#contact-table">Name</a></th>
+        <th>Battery</th>
+        <th><a hx-get="/mesh/api/contacts?sort=snr" hx-target="#contact-table">SNR</a></th>
+        <th><a hx-get="/mesh/api/contacts?sort=last_heard" hx-target="#contact-table">Last Heard</a></th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in contacts %}
+      <tr>
+        <td class="mono" style="color:var(--copper)">{{ c.node_id }}</td>
+        <td>{{ c.name or '-' }}</td>
+        <td>
+          {% if c.battery_level %}
+          <span class="battery-indicator">
+            <span class="battery-level" style="width:{{ c.battery_level }}%;background:{% if c.battery_level > 60 %}var(--success){% elif c.battery_level > 30 %}var(--amber){% else %}var(--red){% endif %}"></span>
+          </span>
+          <span style="font-size:11px">{{ c.battery_level }}%</span>
+          {% else %}-{% endif %}
+        </td>
+        <td>
+          {% if c.snr is not none %}
+          <span style="color:{% if c.snr > 5 %}var(--success){% elif c.snr > 0 %}var(--amber){% else %}var(--red){% endif %}">
+            {{ "%.1f"|format(c.snr) }} dB
+          </span>
+          {% else %}-{% endif %}
+        </td>
+        <td style="font-size:11px;color:var(--text-dim)">{{ c.last_heard or '-' }}</td>
+        <td>
+          <button class="btn btn-sm" onclick="showContactDetail('{{ c.node_id }}')">Detail</button>
+          <button class="btn btn-sm" hx-post="/mesh/api/request_telemetry"
+                  hx-vals='{"contact_key":"{{ c.public_key[:12] if c.public_key else c.node_id }}"}'
+                  hx-target="#mesh-status">Telem</button>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:32px">
+        No contacts discovered yet. Connect and advertise to find mesh nodes.
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
