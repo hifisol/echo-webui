@@ -37,8 +37,8 @@ Tactical RF dashboard for Raspberry Pi pentesting rigs. Built with Flask, HTMX, 
 
 ```bash
 # Clone
-git clone https://github.com/hifisol/rptr-webui.git
-cd rptr-webui
+git clone https://github.com/hifisol/echo-webui.git
+cd echo-webui
 
 # Virtual environment
 python3 -m venv venv
@@ -51,7 +51,7 @@ cp config.yaml.example config.yaml
 
 # Initialize database
 mkdir -p data
-sqlite3 data/rptr.db < migrations/schema.sql
+sqlite3 data/echo.db < migrations/schema.sql
 
 # Run (development)
 python app.py
@@ -64,10 +64,10 @@ gunicorn --bind 0.0.0.0:8443 --workers 2 --threads 4 --worker-class gthread --ti
 
 ```bash
 # Copy and edit the service file
-sudo cp rptr-webui.service /etc/systemd/system/
+sudo cp echo-webui.service /etc/systemd/system/
 # Edit bind address, paths as needed
 sudo systemctl daemon-reload
-sudo systemctl enable --now rptr-webui
+sudo systemctl enable --now echo-webui
 ```
 
 ## Configuration
@@ -87,10 +87,10 @@ Copy `config.yaml.example` to `config.yaml` and customize:
 ## Project Structure
 
 ```
-rptr-webui/
+echo-webui/
 ├── app.py                  # Flask app factory + SSE endpoints
 ├── config.yaml.example     # Configuration template
-├── rptr-webui.service      # systemd unit
+├── echo-webui.service      # systemd unit
 ├── requirements.txt
 ├── core/
 │   ├── auth.py             # Token auth + rate limiting

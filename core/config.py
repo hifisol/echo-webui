@@ -5,7 +5,7 @@ import yaml
 def load_config(path=None):
     if path is None:
         path = os.environ.get(
-            "VNT_RPTR_CONFIG",
+            "ECHO_CONFIG",
             os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.yaml"),
         )
     with open(path) as f:

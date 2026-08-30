@@ -7,9 +7,9 @@ Wants=network-online.target
 Type=simple
 User=root
 Group=root
-WorkingDirectory=/opt/rptr-webui
+WorkingDirectory=/opt/echo-webui
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/opt/rptr-webui/venv/bin/gunicorn \
+ExecStart=/opt/echo-webui/venv/bin/gunicorn \
     --bind 0.0.0.0:8443 \
     --workers 2 \
     --threads 4 \
