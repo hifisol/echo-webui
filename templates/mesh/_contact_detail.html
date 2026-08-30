@@ -32,11 +32,13 @@
   </div>
 </div>
 
+{% if not readonly %}
 <div style="display:flex;gap:6px;margin-bottom:16px">
   <button class="btn btn-sm" hx-post="/mesh/api/request_telemetry"
           hx-vals='{"contact_key":"{{ contact.public_key[:12] if contact.public_key else contact.node_id }}"}'
           hx-target="#mesh-status">Request Telemetry</button>
 </div>
+{% endif %}
 
 {% if telemetry %}
 <h4 style="margin-bottom:8px;color:var(--steel)">Recent Telemetry</h4>

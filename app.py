@@ -49,15 +49,29 @@ def create_app():
     # MeshCore manager
     mesh_cfg = cfg.get("mesh", {})
     if mesh_cfg.get("enabled", False):
-        from tools.mesh_manager import MeshManager
-        mesh_mgr = MeshManager(
-            db_path=db_path,
-            serial_port=mesh_cfg.get("serial_port", "/dev/ttyUSB0"),
-            baud_rate=mesh_cfg.get("baud_rate", 115200),
-        )
-        app.config["mesh_manager"] = mesh_mgr
-        if mesh_cfg.get("auto_connect", False):
+        mode = mesh_cfg.get("mode", "serial")
+
+        if mode == "readonly":
+            from tools.mesh_reader import MeshReader
+            mesh_mgr = MeshReader(
+                db_path=db_path,
+                log_dir=mesh_cfg.get("log_dir", "/var/log/meshcore"),
+                poll_interval=mesh_cfg.get("poll_interval", 2.0),
+            )
             mesh_mgr.start()
+            app.config["mesh_manager"] = mesh_mgr
+            app.config["mesh_readonly"] = True
+        else:
+            from tools.mesh_manager import MeshManager
+            mesh_mgr = MeshManager(
+                db_path=db_path,
+                serial_port=mesh_cfg.get("serial_port", "/dev/ttyUSB0"),
+                baud_rate=mesh_cfg.get("baud_rate", 115200),
+            )
+            app.config["mesh_manager"] = mesh_mgr
+            app.config["mesh_readonly"] = False
+            if mesh_cfg.get("auto_connect", False):
+                mesh_mgr.start()
 
     # Pass config to dashboard blueprint
     dashboard.bp.config = cfg

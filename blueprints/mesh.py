@@ -5,6 +5,8 @@ from core.database import query_db, execute_db
 
 bp = Blueprint("mesh", __name__, url_prefix="/mesh")
 
+READONLY_MSG = '<div class="alert alert-info">Read-only mode — logger service owns serial</div>'
+
 
 def _mgr():
     return current_app.config.get("mesh_manager")
@@ -14,6 +16,10 @@ def _db():
     return current_app.config["cfg"]["database"]["path"]
 
 
+def _readonly():
+    return current_app.config.get("mesh_readonly", False)
+
+
 # ------------------------------------------------------------------
 # Pages
 # ------------------------------------------------------------------
@@ -21,11 +27,20 @@ def _db():
 @bp.route("/")
 def index():
     db_path = _db()
+    readonly = _readonly()
     contact_count = query_db(db_path, "SELECT COUNT(*) AS c FROM mesh_contacts", one=True)
     msg_count = query_db(db_path, "SELECT COUNT(*) AS c FROM mesh_messages", one=True)
     mgr = _mgr()
+
+    if readonly and mgr:
+        device_status = mgr.get_device_status()
+        connected = device_status.get("connected", False)
+    else:
+        connected = mgr.is_running if mgr else False
+
     return render_template("mesh/index.html",
-                           connected=mgr.is_running if mgr else False,
+                           connected=connected,
+                           readonly=readonly,
                            contact_count=contact_count["c"] if contact_count else 0,
                            message_count=msg_count["c"] if msg_count else 0)
 
@@ -36,6 +51,8 @@ def index():
 
 @bp.route("/api/connect", methods=["POST"])
 def connect():
+    if _readonly():
+        return READONLY_MSG
     mgr = _mgr()
     if not mgr:
         return '<div class="alert alert-danger">Mesh manager not configured</div>'
@@ -47,6 +64,8 @@ def connect():
 
 @bp.route("/api/disconnect", methods=["POST"])
 def disconnect():
+    if _readonly():
+        return READONLY_MSG
     mgr = _mgr()
     if mgr:
         mgr.stop()
@@ -61,10 +80,20 @@ def disconnect():
 def status():
     mgr = _mgr()
     db_path = _db()
+    readonly = _readonly()
     rows = query_db(db_path, "SELECT key, value FROM mesh_device_state")
     state = {r["key"]: r["value"] for r in rows} if rows else {}
+
+    if readonly and mgr:
+        device_status = mgr.get_device_status()
+        connected = device_status.get("connected", False)
+        state.setdefault("firmware", device_status.get("firmware", ""))
+    else:
+        connected = mgr.is_running if mgr else False
+
     return render_template("mesh/_device_status.html",
-                           connected=mgr.is_running if mgr else False,
+                           connected=connected,
+                           readonly=readonly,
                            state=state,
                            error=mgr.last_error if mgr else None)
 
@@ -85,7 +114,9 @@ def contacts():
 
     rows = query_db(db_path,
                      f"SELECT * FROM mesh_contacts ORDER BY {sort} {order}")
-    return render_template("mesh/_contact_table.html", contacts=rows or [])
+    return render_template("mesh/_contact_table.html",
+                           contacts=rows or [],
+                           readonly=_readonly())
 
 
 @bp.route("/api/contact/<node_id>")
@@ -105,11 +136,14 @@ def contact_detail(node_id):
                           (node_id,))
     return render_template("mesh/_contact_detail.html",
                            contact=contact, messages=messages or [],
-                           telemetry=telemetry or [])
+                           telemetry=telemetry or [],
+                           readonly=_readonly())
 
 
 @bp.route("/api/refresh_contacts", methods=["POST"])
 def refresh_contacts():
+    if _readonly():
+        return READONLY_MSG
     mgr = _mgr()
     if mgr and mgr.is_running:
         mgr.refresh_contacts()
@@ -143,6 +177,8 @@ def messages():
 
 @bp.route("/api/send", methods=["POST"])
 def send_message():
+    if _readonly():
+        return READONLY_MSG
     mgr = _mgr()
     if not mgr or not mgr.is_running:
         return '<div class="alert alert-danger">Not connected</div>'
@@ -160,6 +196,8 @@ def send_message():
 
 @bp.route("/api/send_channel", methods=["POST"])
 def send_channel():
+    if _readonly():
+        return READONLY_MSG
     mgr = _mgr()
     if not mgr or not mgr.is_running:
         return '<div class="alert alert-danger">Not connected</div>'
@@ -184,6 +222,8 @@ def send_channel():
 
 @bp.route("/api/request_telemetry", methods=["POST"])
 def request_telemetry():
+    if _readonly():
+        return READONLY_MSG
     mgr = _mgr()
     if not mgr or not mgr.is_running:
         return '<div class="alert alert-danger">Not connected</div>'
@@ -201,6 +241,8 @@ def request_telemetry():
 @bp.route("/api/config", methods=["GET", "POST"])
 def device_config():
     if request.method == "POST":
+        if _readonly():
+            return READONLY_MSG
         mgr = _mgr()
         if not mgr or not mgr.is_running:
             return '<div class="alert alert-danger">Not connected</div>'
@@ -220,7 +262,9 @@ def device_config():
     db_path = _db()
     rows = query_db(db_path, "SELECT key, value FROM mesh_device_state")
     config = {r["key"]: r["value"] for r in rows} if rows else {}
-    return render_template("mesh/_device_config.html", config=config)
+    return render_template("mesh/_device_config.html",
+                           config=config,
+                           readonly=_readonly())
 
 
 # ------------------------------------------------------------------
@@ -229,6 +273,8 @@ def device_config():
 
 @bp.route("/api/advertise", methods=["POST"])
 def advertise():
+    if _readonly():
+        return READONLY_MSG
     mgr = _mgr()
     if not mgr or not mgr.is_running:
         return '<div class="alert alert-danger">Not connected</div>'

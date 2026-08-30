@@ -3,7 +3,11 @@
     <div class="status-item">
       <span class="status-label">Connection</span>
       <span class="status-value {% if connected %}text-success{% else %}text-dim{% endif %}">
+        {% if readonly %}
+        {{ "Logger Active" if connected else "Logger Offline" }}
+        {% else %}
         {{ "Connected" if connected else "Disconnected" }}
+        {% endif %}
       </span>
     </div>
     {% if error %}

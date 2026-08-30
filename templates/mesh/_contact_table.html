@@ -33,9 +33,11 @@
         <td style="font-size:11px;color:var(--text-dim)">{{ c.last_heard or '-' }}</td>
         <td>
           <button class="btn btn-sm" onclick="showContactDetail('{{ c.node_id }}')">Detail</button>
+          {% if not readonly %}
           <button class="btn btn-sm" hx-post="/mesh/api/request_telemetry"
                   hx-vals='{"contact_key":"{{ c.public_key[:12] if c.public_key else c.node_id }}"}'
                   hx-target="#mesh-status">Telem</button>
+          {% endif %}
         </td>
       </tr>
       {% else %}

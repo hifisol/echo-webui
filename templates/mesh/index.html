@@ -4,12 +4,16 @@
 <div class="topbar">
   <h2>LoRa Mesh Network</h2>
   <div class="topbar-actions">
+    {% if readonly %}
+    <span class="badge" style="background:var(--steel);padding:6px 12px;font-size:12px">Read-Only</span>
+    {% else %}
     {% if connected %}
     <button class="btn" hx-post="/mesh/api/disconnect" hx-target="#mesh-status" hx-swap="innerHTML">Disconnect</button>
     {% else %}
     <button class="btn btn-primary" hx-post="/mesh/api/connect" hx-target="#mesh-status" hx-swap="innerHTML">Connect</button>
     {% endif %}
     <button class="btn btn-sm" hx-post="/mesh/api/advertise" hx-target="#mesh-status" hx-swap="innerHTML">Advertise</button>
+    {% endif %}
   </div>
 </div>
 
@@ -34,7 +38,9 @@
   <div class="card">
     <div class="card-header">
       <h3>Mesh Contacts</h3>
+      {% if not readonly %}
       <button class="btn btn-sm" hx-post="/mesh/api/refresh_contacts" hx-target="#mesh-status" hx-swap="innerHTML">Refresh</button>
+      {% endif %}
     </div>
     <div id="contact-table" hx-get="/mesh/api/contacts" hx-trigger="load, every 10s" hx-swap="innerHTML">
       <div class="card-body" style="color:var(--text-dim)">Loading...</div>
@@ -46,6 +52,7 @@
 <div id="tab-messages" class="mesh-tab" style="display:none">
   <div class="card">
     <div class="card-header"><h3>Direct Messages</h3></div>
+    {% if not readonly %}
     <div class="card-body">
       <form hx-post="/mesh/api/send" hx-target="#msg-status" hx-swap="innerHTML" class="mesh-send-form">
         <div class="form-row">
@@ -56,6 +63,7 @@
       </form>
       <div id="msg-status"></div>
     </div>
+    {% endif %}
     <div class="card-body" style="padding-top:0">
       <div class="msg-filter-bar">
         <button class="btn btn-sm" hx-get="/mesh/api/messages" hx-target="#message-list">All</button>
@@ -73,6 +81,7 @@
 <div id="tab-channels" class="mesh-tab" style="display:none">
   <div class="card">
     <div class="card-header"><h3>Channel Broadcast</h3></div>
+    {% if not readonly %}
     <div class="card-body">
       <form hx-post="/mesh/api/send_channel" hx-target="#chan-status" hx-swap="innerHTML" class="mesh-send-form">
         <div class="form-row">
@@ -88,6 +97,7 @@
       </form>
       <div id="chan-status"></div>
     </div>
+    {% endif %}
     <div id="channel-messages" hx-get="/mesh/api/messages?type=channel" hx-trigger="load, every 5s" hx-swap="innerHTML">
       <div class="card-body" style="color:var(--text-dim)">Loading...</div>
     </div>
