@@ -84,6 +84,10 @@ Copy `config.yaml.example` to `config.yaml` and customize:
 | `mesh.enabled` | Enable/disable MeshCore integration |
 | `sdr.device_index` | RTL-SDR device index |
 
+## Playbooks
+
+Repeatable workflows for the appliances in the RPTR stack live in [`Playbooks/`](Playbooks/README.md). The index lists each playbook and its status.
+
 ## Project Structure
 
 ```
