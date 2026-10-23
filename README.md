@@ -88,6 +88,32 @@ Copy `config.yaml.example` to `config.yaml` and customize:
 
 Repeatable workflows for the appliances in the RPTR stack live in [`Playbooks/`](Playbooks/README.md). The index lists each playbook and its status.
 
+### GVM web UI on the RPTR scanner host
+
+The scanner host runs the Greenbone Community Edition containers in `~/gvm-community/` (Docker Compose, project `greenbone-community-edition`). Placeholders below: `<RPTR_HOST>` is the host's Tailscale address, `<SSH_ALIAS>` is your SSH alias for the host's service account, and `<KEY_FILE>` is the private key file for that alias.
+
+1. **Check the stack.** On the host, from `~/gvm-community/`:
+   ```bash
+   docker compose -f docker-compose.yml -p greenbone-community-edition ps --format "table {{.Service}}\t{{.State}}"
+   ```
+   Every service should be `running`. The feed-loading services (`vulnerability-tests`, `scap-data`, `notus-data`, `cert-bund-data`, `dfn-cert-data`, `data-objects`) exit after copying their data, which is expected.
+2. **Wait for the feeds.** gvmd returns `503 Service temporarily down` while the SCAP feed syncs. Don't start scans until that clears.
+3. **Open an SSH tunnel** from your workstation. The UI listens on the host's localhost only, so the tunnel is the only route in:
+   ```bash
+   ssh -i <KEY_FILE> -L 8443:127.0.0.1:443 <SSH_ALIAS>
+   ```
+   Leave the tunnel open, then browse to `https://localhost:8443`. Accept the self-signed certificate warning.
+4. **Log in** as `admin`. The password is set on the host, not in this repo. Read it with `ssh <SSH_ALIAS> 'cat ~/gvm-community/admin-password.txt'` and move it to a password manager. Delete the host copy afterwards.
+5. **Change the admin password** on the host if it has been exposed:
+   ```bash
+   docker compose -f docker-compose.yml -p greenbone-community-edition exec -T -u gvmd gvmd gvmd --user=admin --new-password='<NEW_PASSWORD>'
+   ```
+
+**Notes**
+- Keep the UI on localhost. Ports 443 and 9392 are closed to the network by design, and the host firewall (ufw) allows only SSH and RDP from the tailnet and the scanner VLAN.
+- Only scan systems you own or have written authorization to test.
+- GVM and Nuclei compete for CPU and RAM on the same host. Don't run a full GVM scan and a large Nuclei run at the same time.
+
 ## Project Structure
 
 ```
