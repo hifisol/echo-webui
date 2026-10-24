@@ -84,31 +84,40 @@ Copy `config.yaml.example` to `config.yaml` and customize:
 | `mesh.enabled` | Enable/disable MeshCore integration |
 | `sdr.device_index` | RTL-SDR device index |
 
-## GVM Web UI on the Scanner Host
+## Scanning Stack on the RPTR Scanner Host
 
-The scanner host runs the Greenbone Community Edition containers in `~/gvm-community/` (Docker Compose, project `greenbone-community-edition`). Placeholders below: `<RPTR_HOST>` is the host's Tailscale address, `<SSH_ALIAS>` is your SSH alias for the host's service account, and `<KEY_FILE>` is the private key file for that alias.
+The scanner host runs three tools. Placeholders: `<RPTR_HOST>` is the host's Tailscale address, `<NAME>` is an engagement name, and `<SITE_SLUG>` is a filename with no slashes.
 
-1. **Check the stack.** On the host, from `~/gvm-community/`:
-   ```bash
-   docker compose -f docker-compose.yml -p greenbone-community-edition ps --format "table {{.Service}}\t{{.State}}"
-   ```
-   Every service should be `running`. The feed-loading services (`vulnerability-tests`, `scap-data`, `notus-data`, `cert-bund-data`, `dfn-cert-data`, `data-objects`) exit after copying their data, which is expected.
-2. **Wait for the feeds.** gvmd returns `503 Service temporarily down` while the SCAP feed syncs. Don't start scans until that clears.
-3. **Open an SSH tunnel** from your workstation. The UI listens on the host's localhost only, so the tunnel is the only route in:
-   ```bash
-   ssh -i <KEY_FILE> -L 8443:127.0.0.1:443 <SSH_ALIAS>
-   ```
-   Leave the tunnel open, then browse to `https://localhost:8443`. Accept the self-signed certificate warning.
-4. **Log in** as `admin`. The password is set on the host, not in this repo. Read it with `ssh <SSH_ALIAS> 'cat ~/gvm-community/admin-password.txt'` and move it to a password manager. Delete the host copy afterwards.
-5. **Change the admin password** on the host if it has been exposed:
-   ```bash
-   docker compose -f docker-compose.yml -p greenbone-community-edition exec -T -u gvmd gvmd gvmd --user=admin --new-password='<NEW_PASSWORD>'
-   ```
+**Access.** The host's web portals are reachable only from devices allowed by the Tailscale ACL, on these ports: `443` (GVM portal) and `8080` (DefectDojo). RDP (`3389`) and SSH (`22`) are allowed the same way. The host firewall (ufw) allows these ports only on the `tailscale0` interface. Passwords and secrets are stored on the host and never in this repo.
 
-**Notes**
-- Keep the UI on localhost. Ports 443 and 9392 are closed to the network by design, and the host firewall (ufw) allows only SSH and RDP from the tailnet and the scanner VLAN.
-- Only scan systems you own or have written authorization to test.
-- GVM and Nuclei compete for CPU and RAM on the same host. Don't run a full GVM scan and a large Nuclei run at the same time.
+**GVM (host and network scans).**
+- Runs as Greenbone Community Edition containers in `~/gvm-community/` (Docker Compose, project `greenbone-community-edition`). The override file `docker-compose.override.tailnet.yml` binds the portal to `<RPTR_HOST>:443`.
+- Portal: `https://<RPTR_HOST>`. Accept the self-signed certificate. Log in as `admin`.
+- Check the feeds first: **Administration > Feed Status**. Scans return nothing useful while the SCAP or NVT feed is still syncing.
+- Create a target (**Configuration > Targets**), then a task (**Scans > Tasks**). Scan config **Full and fast** is the normal choice. **Discovery** finds hosts and services without vulnerability checks.
+- Export the report and import it into DefectDojo as `OpenVAS`.
+
+**Nuclei (website and web app checks).**
+- Installed from the Parrot repository (`nuclei` 3.6.1). Check with `nuclei -version`.
+- Run detached with `nohup` so a dropped SSH session doesn't stop it, and keep a log:
+  ```bash
+  mkdir -p ~/engagements/<NAME>/nuclei
+  cd ~/engagements/<NAME>/nuclei
+  nohup nuclei -u https://<SITE> -etags dos,fuzz -s medium,high,critical \
+    -rl 10 -c 5 -timeout 10 -retries 1 -ni -stats \
+    -jsonl -o <SITE_SLUG>.jsonl > <SITE_SLUG>-run.log 2>&1 < /dev/null &
+  ```
+- `-etags dos,fuzz` skips denial-of-service and fuzzing templates. `-ni` turns off out-of-band callbacks. Keep the rate low (`-rl`) unless you have agreed otherwise.
+- The last line of the log reports the result (`Scan completed ... N matches found`).
+- Import the `.jsonl` file into DefectDojo as `Nuclei Scan`.
+
+**DefectDojo (findings tracking).**
+- Runs from `~/defectdojo/` (DefectDojo Docker Compose). The override file `docker-compose.override.tailnet.yml` binds the web app to `<RPTR_HOST>:8080`.
+- Settings live in `~/defectdojo/.env` (mode 600). It holds the secret key, the credential key, the database password, and the allowed hosts. Never commit this file. The upstream defaults are public, so the values must be replaced.
+- Login: `http://<RPTR_HOST>:8080`, user `admin`. The first-boot password is in the initializer log (`docker compose logs initializer`).
+- Structure: one product per site or client, one engagement per scan, then import the results and triage them (verified, false positive, accepted risk, fixed).
+
+**Scope and rules.** Only scan systems you own or have written authorization to test. Keep engagement output out of git (the repo ignores `engagements/`, `*.jsonl`, `*.nessus`, and `*.burp`). Don't run a full GVM scan and a large Nuclei run at the same time on this host.
 
 ## Project Structure
 
